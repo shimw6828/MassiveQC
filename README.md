@@ -47,7 +47,7 @@ conda create -c bioconda -n MassiveQC MassiveQC
 ## Usage
 For users running locally, we provide the `MultiQC` to automate parallel processing.
 ```
-usage: MultiQC [-h] [-c CONF] -i INPUT -a ASCP_KEY -f FASTQ_SCREEN_CONFIG -g GTF -x HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p
+usage: MultiQC [-h] [-c CONF] -i INPUT [-a ASCP_KEY] -f FASTQ_SCREEN_CONFIG -g GTF -x HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p
                        PICARD -r REF_FLAT -o OUTDIR [-w WORKERS] [-t THREADS] [-d DOWNLOAD] [--only_download]
 
 ...
@@ -112,7 +112,7 @@ gtfToGenePred -genePredExt dmel-all-r6.11.gtf \
 For users running on cluster (PBS or Slurm), we provide `SingleQC` and `IsoDetect` for single sample. Users can batch process samples according to their platform.
 
 ```
-usage: SingleQC [-h] [-c CONF] -s SRR -a ASCP_KEY -f FASTQ_SCREEN_CONFIG -g GTF -x
+usage: SingleQC [-h] [-c CONF] -s SRR [-a ASCP_KEY] -f FASTQ_SCREEN_CONFIG -g GTF -x
                         HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p PICARD -r REF_FLAT -o OUTDIR
                         [-t THREADS] [-d DOWNLOAD] [--only_download]
 
@@ -155,7 +155,7 @@ cd ~/project/MassiveQC/pbs
 for srr in `sed "1d" ~/project/input.txt|cut -f2 |xargs`
 do
   # We have no network in the node, so we need to download the fastq file in advance
-  python SingleQC -c ~/project/config.txt -s $srr --only_download
+  SingleQC -c ~/project/config.txt -s $srr --only_download
   #conda activate in pbs or slurm will be failed, see https://github.com/conda/conda/issues/5071
   # If the download is successful, the download step will be skipped.
   echo "source activate MassiveQC; SingleQC -c ~/project/config.txt -s $srr --skip_download" > ~/project/MassiveQC/pbs/${srr}.pbs
