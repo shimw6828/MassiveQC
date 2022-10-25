@@ -109,7 +109,43 @@ gtfToGenePred -genePredExt dmel-all-r6.11.gtf \
 {print $12, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' >  dmel_r6-11.refflat
 ```
 
-For users running on cluster (PBS or Slurm), we provide `SingleQC` and `IsoDetect` for single sample. Users can batch process samples according to their platform. Here we provide an example on a PBS.
+For users running on cluster (PBS or Slurm), we provide `SingleQC` and `IsoDetect` for single sample. Users can batch process samples according to their platform.
+
+```
+usage: SingleQC [-h] [-c CONF] -s SRR -a ASCP_KEY -f FASTQ_SCREEN_CONFIG -g GTF -x
+                        HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p PICARD -r REF_FLAT -o OUTDIR
+                        [-t THREADS] [-d DOWNLOAD] [--only_download]
+
+...
+
+options:
+  -h, --help            show this help message and exit
+  -c CONF, --conf CONF
+  -s SRR, --srr SRR     SRR id
+  -a ASCP_KEY, --ascp_key ASCP_KEY
+                        Locate aspera key. Default $HOME/.aspera/connect/etc/asperaweb_id_dsa.openssh
+  -f FASTQ_SCREEN_CONFIG, --fastq_screen_config FASTQ_SCREEN_CONFIG
+                        Path to the fastq_screen conf file, can be download from fastq_screen website
+  -g GTF, --gtf GTF     Path to the GTF file with annotations
+  -x HT2_IDX, --ht2-idx HT2_IDX
+                        Hisat2 index filename prefix
+  -k KNOWN_SPLICESITE_INFILE, --known-splicesite-infile KNOWN_SPLICESITE_INFILE
+                        Hisat2 splicesite file, provide a list of known splice sites
+  -p PICARD, --picard PICARD
+                        Path to picard.jar
+  -r REF_FLAT, --ref_flat REF_FLAT
+                        Path to refflat file
+  -o OUTDIR, --outdir OUTDIR
+                        Path to result output directory. If it doesn't exist, it will be created automatically
+  -t THREADS, --THREADS THREADS
+                        The number of threads for tools like Hisat2 in one task
+  -d DOWNLOAD, --download DOWNLOAD
+                        Path to SRA fastq files. The default is $outdir/download
+  --only_download       Only run the download step
+
+```
+
+Here we provide an example on a PBS.
 ```
 # create the outdir and pbs dir
 mkdir -p ~/project/MassiveQC
