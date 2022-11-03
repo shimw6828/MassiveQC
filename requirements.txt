@@ -1,0 +1,9 @@
+sklearn
+shap
+pysradb
+xopen
+NumPy
+Pandas >=1.3.2
+pyarrow
+more_itertools
+tqdm

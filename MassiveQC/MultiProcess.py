@@ -1,7 +1,8 @@
-import argparse, os
-import sys
-import logging
+import argparse
 import configparser
+import logging
+import os
+
 import pandas as pd
 
 logging.basicConfig(format='%(asctime)s %(message)s')
@@ -11,18 +12,18 @@ from pathlib import Path
 from concurrent import futures
 from tqdm import tqdm
 
-sys.path.insert(0, "/home/mwshi/github/MassiveQC")
-from MassiveQC.get_sra import get_sra
-from MassiveQC.check_fq import check_fq
-from MassiveQC.fastq_screen import fastq_screen
-from MassiveQC.atropos import atropos
-from MassiveQC.hisat2 import Hisat2
-from MassiveQC.collectrnaseqmetrics import CollectRnaseqMetrics
-from MassiveQC.markduplicates import MarkDuplicates
-from MassiveQC.FeatureCounts import FeatureCounts
-from MassiveQC.feature_store import check_done_sample, feature_store
-from MassiveQC.detection import detection
-
+# sys.path.insert(0, "/home/mwshi/github/MassiveQC")
+from .get_sra import get_sra
+from .check_fq import check_fq
+from .fastq_screen import fastq_screen
+from .atropos import atropos
+from .hisat2 import Hisat2
+from .collectrnaseqmetrics import CollectRnaseqMetrics
+from .markduplicates import MarkDuplicates
+from .FeatureCounts import FeatureCounts
+from .feature_store import check_done_sample, feature_store
+from .detection import detection
+from .parser import remove_file
 
 def init_wd():
     Path(outdir).mkdir(exist_ok=True)
@@ -46,19 +47,25 @@ def init_wd():
 
 def process(SRR):
     logger.info(f"Start download {SRR}")
-    fq_mode = get_sra(SRR, download_path, ascp_key)
+    if not skip_download:
+        fq_mode = get_sra(SRR, download_path, ascp_key)
+        logger.info(f"Complete download {SRR}")
     if only_download:
         return
-    logger.info(f"Complete download {SRR}")
-    logger.info(f"Start check {SRR} fastq file")
+
     # check_fq
     # Check if the result file exists.
+    logger.info(f"Start check {SRR} fastq file")
     summary_file = feature_path / "layout" / f"{SRR}.parquet"
     if summary_file.exists():
         logger.info(f"{SRR} fastq file has been checked")
     else:
-        check_fq(SRR, download_path, QC_dir, feature_path)
-    logger.info(f"Complete check {SRR} fastq file")
+        raw_fqs = check_fq(SRR, download_path, QC_dir, feature_path)
+        # remove the raw fastq
+        if remove_fastq:
+            for k in raw_fqs:
+                logger.info(f"Remove {k}")
+                remove_file(k)
 
     # fastq_screen
     fastq_screen_output = feature_path / "fastq_screen" / f"{SRR}.parquet"
@@ -66,7 +73,6 @@ def process(SRR):
         logger.info(f"{SRR} fastq_screen step has been done")
     else:
         fastq_screen(SRR, QC_dir, feature_path.as_posix(), fastq_screen_config, THREADS)
-    logger.info(f"Complete fastq_screen {SRR} fastq file")
 
     # atropos
     atropos_output = feature_path / "atropos" / f"{SRR}.parquet"
@@ -82,7 +88,11 @@ def process(SRR):
         logger.info(f"{SRR} hisat2 step has been done")
     else:
         hisat_runner = Hisat2(feature_path.as_posix(), SRR, QC_dir, Bam_dir, THREADS, reference, splice=splice)
-        hisat_runner.hisat2()
+        trim_fqs = hisat_runner.hisat2()
+        if remove_fastq:
+            for k in trim_fqs:
+                logger.info(f"Remove {k}")
+                remove_file(k)
 
     # metrics
     strand = feature_path / "strand" / f"{SRR}.parquet"
@@ -108,7 +118,9 @@ def process(SRR):
         logger.info(f"{SRR} FeatureCounts step has been done")
     else:
         count_runner = FeatureCounts(feature_path.as_posix(), SRR, Bam_dir, Count_dir, gtf, THREADS)
-        count_runner.FeatureCounts()
+        bam_file = count_runner.FeatureCounts()
+        if remove_bam:
+            remove_file(bam_file)
 
     # complete one srr, touch one file
     (feature_path / "DoneSample" / SRR).touch()
@@ -128,7 +140,6 @@ def local_thread(SRRs):
                 res = r.result()
 
 
-
 def get_arguments():
     # parse the config file
     pre = argparse.ArgumentParser(add_help=False)
@@ -142,7 +153,7 @@ def get_arguments():
         config_args.update(dict(config.items("Defaults")))
     parser = argparse.ArgumentParser(description='...', parents=[pre])
     parser.add_argument('-i', '--input', required=True, type=str, help='Input file, containing two columns srx and srr')
-    parser.add_argument('-a', '--ascp_key', required=True, type=str, help='Locate aspera key. Default $HOME/.aspera/connect/etc/asperaweb_id_dsa.openssh')
+    parser.add_argument('-a', '--ascp_key', type=str, help='Locate aspera key. Default $HOME/.aspera/connect/etc/asperaweb_id_dsa.openssh')
     parser.add_argument('-f', '--fastq_screen_config', required=True, type=str, help="Path to the fastq_screen conf file, can be download from fastq_screen website")
     parser.add_argument('-g', '--gtf', required=True, type=str, help="Path to the GTF file with annotations")
     parser.add_argument('-x', '--ht2-idx', dest="ht2_idx", required=True, type=str, help="Hisat2 index filename prefix")
@@ -152,8 +163,11 @@ def get_arguments():
     parser.add_argument('-o', '--outdir', required=True, type=str, help="Path to result output directory. If it doesn't exist, it will be created automatically")
     parser.add_argument('-w', '--workers', type=int, help="The number of simultaneous tasks", default=2)
     parser.add_argument('-t', '--THREADS', type=int, help="The number of threads for tools like Hisat2 in one task", default=4)
-    parser.add_argument('-d', '--download', type=str, help="Path to SRA fastq files. The default is $outdir/download")
+    parser.add_argument('-d', '--download', type=str, help="Path to SRA fastq files. The default is $OUTDIR/download")
     parser.add_argument('--only_download', action="store_true", help="Only run the download step", default=False)
+    parser.add_argument('--skip_download', action="store_true", help="Skip the download step", default=False)
+    parser.add_argument('--remove_fastq', action="store_true", help="Don't remain the fastq after running hisat2", default=False)
+    parser.add_argument('--remove_bam', action="store_true", help="Don't remain the bam after running FeatureCounts", default=False)
     parser.set_defaults(**config_args)
     if pre_args.conf:
         for action in parser._actions:
@@ -167,6 +181,12 @@ def main():
     args = get_arguments()
     global only_download
     only_download = args.only_download
+    global skip_download
+    skip_download = args.skip_download
+    global remove_fastq
+    remove_fastq = args.remove_fastq
+    global remove_bam
+    remove_bam = args.remove_bam
     input_file = args.input.strip('"')
     global ascp_key
     ascp_key = args.ascp_key.strip('"')
@@ -189,7 +209,10 @@ def main():
     global THREADS
     THREADS = args.THREADS
     global download_path
-    download_path = os.path.join(outdir, "download")
+    if args.download:
+        download_path = args.download
+    else:
+        download_path = os.path.join(outdir, "download")
     global QC_dir
     QC_dir = os.path.join(outdir, "QC_dir")
     global Bam_dir
@@ -203,7 +226,7 @@ def main():
     done_sample = feature_path / "done_sample.txt"
     # init workshop
     init_wd()
-    srr_df = pd.read_table(input_file)
+    srr_df = pd.read_table(input_file, comment='#')
     if len(srr_df.columns) == 1:
         # only have srr column
         srr_df.columns = ["srr"]

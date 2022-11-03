@@ -10,6 +10,7 @@ logger = logging.getLogger("MassiveQC")
 
 
 class CollectRnaseqMetrics(object):
+    """This class uses picard to extract RnaSeqMetrics information"""
     def __init__(self, feature_path: str, SRR: str, Bam_dir: str,
                  THREADS: int, ref_flat: str, picard: str, MEM: Optional[int] = 3):
         self.feature_path = Path(feature_path)
@@ -28,6 +29,7 @@ class CollectRnaseqMetrics(object):
         remove_file(unstranded.as_posix())
         remove_file(first.as_posix())
         remove_file(second.as_posix())
+        logger.info(f"{self.SRR} Complete metrics")
 
     def run_picard(self, bam: Path):
         cmd = (

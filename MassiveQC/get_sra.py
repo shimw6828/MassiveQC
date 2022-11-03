@@ -17,11 +17,11 @@ def _find_aspera_keypath(ascp_key=None):
     """Locate aspera key.
     Parameters
     ----------
-    aspera_dir: string
+    aspera_dir: str
                 Location to aspera directory (optional)
     Returns
     -------
-    aspera_keypath: string
+    aspera_keypath: str
                     Location to aspera key
     """
     if ascp_key is None:
@@ -35,13 +35,15 @@ def _find_aspera_keypath(ascp_key=None):
         return aspera_keypath
 
 
-def verify_sra_download(log, download_path, SRR):
+def verify_sra_download(log, SRR):
     if "error" in log.lower():
-        logger.warning("ascp download failed, start downloading with wget")
+        logger.warning("Warning: ascp download failed, start download with wget")
         raise DownloadException("Download Failed")
     if "failed" in log.lower() or "unable" in log.lower():
-        logger.warning("wget download also failed")
-        raise DownloadException("Download Failed")
+        logger.error("wget download also failed")
+        raise DownloadException(f"{SRR} Download Failed")
+    if "command not found" in log.lower():
+        raise DownloadException("Failed ascp not install")
 
 
 def sra_ascp(SRR: str, download_path: str, ascp_key) -> Path:
@@ -49,7 +51,7 @@ def sra_ascp(SRR: str, download_path: str, ascp_key) -> Path:
     record = db.sra_metadata(SRR, detailed=True)
     record = record.dropna(axis=1, how="any")
     for a in record.to_dict('records'):
-        if SRR==a["run_accession"]:
+        if SRR == a["run_accession"]:
             record = a
     ena_cols = [x for x in list(record.keys()) if "ena_fastq_ftp" in x]
     fastq_col = [x for x in list(record.keys()) if "ena_fastq_http" in x]
@@ -71,7 +73,7 @@ def sra_ascp(SRR: str, download_path: str, ascp_key) -> Path:
             )
             logger.info(f"running {cmd}")
             log = run_command(cmd)
-            verify_sra_download(log, download_path, SRR)
+            verify_sra_download(log, SRR)
         except:
             download_url = record[fastq]
             if download_url == "":
@@ -85,24 +87,38 @@ def sra_ascp(SRR: str, download_path: str, ascp_key) -> Path:
             )
             logger.info(f"running {cmd}")
             log = run_command(cmd)
-            verify_sra_download(log, download_path, SRR)
+            verify_sra_download(log, SRR)
         filenum += 1
 
 
 def get_sra(SRR: str, download_path: str, ascp_key=None) -> Path:
+    """Download sra fastq
+
+    **parameter**
+    SRR: str
+        SRR ID.
+    download_path: str
+        Download directory
+    ascp_key: str
+        Location to aspera directory (optional)
+
+    **return**
+    Path
+    """
     pe_r1 = Path(download_path) / f"{SRR}_1.fastq.gz"
     pe_r2 = Path(download_path) / f"{SRR}_2.fastq.gz"
     se_r1 = Path(download_path) / f"{SRR}.fastq.gz"
     if Path(se_r1).exists():
-        return "SE"
+        logger.info("The file already exists")
+        return
     if Path(pe_r1).exists() and Path(pe_r2).exists():
-        return "PE"
+        logger.info("The files already exists")
+        return
     try:
         sra_ascp(SRR, download_path, ascp_key)
     except:
         srrs = os.listdir(download_path)
         for srr_file in srrs:
             if SRR in srr_file:
-                os.unlink(os.path.join(download_path,srr_file))
+                os.unlink(os.path.join(download_path, srr_file))
         raise DownloadException(f"{SRR} download failed")
-

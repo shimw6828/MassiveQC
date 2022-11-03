@@ -35,9 +35,10 @@ def screen(config_file, feature_screen, fastq, THREADS: int) -> None:
           f"--conf {config_file} " \
           f"--subset 100000 " \
           f"{fastq} "
-
-    log_info = run_command(cmd, verbose=True)
+    logger.info(f"running {cmd}")
+    log_info = run_command(cmd)
     if "Processing complete" not in log_info:
+        logger.error(log_info)
         raise FastqScreenException
 
 
@@ -80,9 +81,12 @@ class FastqScreenException(Exception):
 
 
 def fastq_screen(SRR, QC_dir, feature_path, config_file, THREADS):
+    """Use fastqscreen to identify RNA seq quality"""
+    logger.info(f"Start fastq screen {SRR}")
     layout_file = Path(feature_path) / "layout" / f"{SRR}.parquet"
     try:
         run_fastq_screen(config_file, feature_path, QC_dir, layout_file, SRR, THREADS)
+        logger.info(f"Complete fast_screen {SRR} fastq file")
     except FastqScreenException:
         logger.warning(f"{SRR}: fastq screen did not complete")
         raise FastqScreenException

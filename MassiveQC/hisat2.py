@@ -9,6 +9,7 @@ logger = logging.getLogger("MassiveQC")
 
 
 class Hisat2(object):
+    """This class can run hisat2 and extract the alignment summary"""
     def __init__(self, feature_path: str, SRR: str, QC_dir: str, Bam_dir: str,
                  THREADS: int, reference: str, strand: Optional[str] = None,
                  splice: Optional[str] = None):
@@ -25,7 +26,9 @@ class Hisat2(object):
         self.r2 = None
 
     def hisat2(self):
+        logger.info(f"")
         layout_ = pd.read_parquet(self.layout).layout[0]
+        trim_fqs = []
         if layout_ == "PE":
             self.r1 = self.QC_dir / f"{self.SRR}_1.trim.fastq.gz"
             self.r2 = self.QC_dir / f"{self.SRR}_2.trim.fastq.gz"
@@ -46,6 +49,9 @@ class Hisat2(object):
         remove_file(sam.as_posix())
         _alnStat = self.feature_path / "aln_stats" / f"{self.SRR}.parquet"
         self.alignment_stats(bam, _alnStat)
+        trim_fqs.append(self.r1.as_posix())
+        trim_fqs.append(self.r2.as_posix())
+        return trim_fqs
 
     def run_hisat2(self):
         if self.r2:
@@ -78,10 +84,10 @@ class Hisat2(object):
             f"{splice_param} "
             f"-S {sam} "
         )
-        logger.info(f"{self.SRR} Start first Hisat2 alignment")
+        logger.info(f"{self.SRR} Start Hisat2 alignment")
         logger.info(f"{cmd}")
         results = run_command(cmd)
-        logger.info(f"{self.SRR} Complete first Hisat2 alignment")
+        logger.info(f"{self.SRR} Complete Hisat2 alignment")
         return results, sam
 
     def compress_sort_and_index(self, sam: Path) -> Tuple[Path, Path]:
@@ -99,8 +105,10 @@ class Hisat2(object):
         else:
             return sorted_bam, sorted_bai
 
-    def alignment_stats(self, bam: Path, output_file: str):
+    def alignment_stats(self, bam: Path, output_file: Path):
+        logger.info(f"samtools stats {bam}")
         result1 = run_command(f"samtools stats {bam}", verbose=False)
+        logger.info(f"bamtools stats -in {bam}")
         result2 = run_command(f"bamtools stats -in {bam}", verbose=False)
         # Summarize
         df = pd.concat([self._samtools(result1), self._bamtools(result2)], axis=1, sort=False)

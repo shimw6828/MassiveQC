@@ -9,6 +9,7 @@ logger = logging.getLogger("MassiveQC")
 
 
 class FeatureCounts(object):
+    """Run FeatureCounts and extract count features"""
     def __init__(self, feature_path: str, SRR: str, Bam_dir: str, Count_dir: str,
                  gtf: str, THREADS: int):
         self.feature_path = Path(feature_path)
@@ -23,6 +24,7 @@ class FeatureCounts(object):
     def FeatureCounts(self):
         counts, jcounts = self.run_featureCounts()
         self.summarize(counts, jcounts)
+        return (self.Bam_dir / f"{self.SRR}.sorted.bam").as_posix()
 
     def run_featureCounts(self):
         # Look up Layout
@@ -52,10 +54,11 @@ class FeatureCounts(object):
             f"{bam}"
         )
         logger.info(f"{cmd}")
-        logger.info(f"{self.SRR} Start featureCounts")
+        logger.info(f"{self.SRR} start featureCounts")
         _result = run_command(cmd)
         self._check_log(_result, self.SRR)
         remove_file(summary.as_posix())
+        logger.info(f"{self.SRR} complete featureCounts")
         return counts, jcounts
 
     def summarize(self, counts: Path, jcounts: Path):

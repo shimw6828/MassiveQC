@@ -8,6 +8,7 @@ from .detection import detection
 
 
 def main():
+    """Combine multiple modules to provide commands for cli"""
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input', required=True, type=str, help='Input file, containing two columns srx and srr')
     parser.add_argument('-o', '--outdir', required=True, type=str, help="Path to result output directory of main process.")

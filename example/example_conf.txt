@@ -1,10 +1,10 @@
 ascp_key = "~/miniconda3/etc/asperaweb_id_dsa.openssh"
-gtf = "~/SRAremapping/dmel-all-r6.11.gtf"
+gtf = "dmel-all-r6.11.gtf"
 fastq_screen_config = "~/project/FastQ_Screen_Genomes/fastq_screen.conf"
-ht2_idx = "~/SRAremapping/dmel.genome"
-known_splicesite_infile = "~/SRAremapping/splicesites.dmel.txt"
-picard = "~/tools/picard.jar"
-ref_flat = "~/dmel_r6-11.refflat"
-outdir = "~/project/MassiveQC"
+ht2_idx = "hisat-index/dmel.genome"
+known_splicesite_infile = "splicesites.dmel.txt"
+picard = "picard.jar"
+ref_flat = "dmel_r6-11.refflat"
+outdir = "results"
 workers = 3
 THREADS = 2

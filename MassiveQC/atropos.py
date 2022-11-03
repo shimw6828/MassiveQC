@@ -1,4 +1,3 @@
-import os, argparse
 from pathlib import Path
 import pandas as pd
 import logging
@@ -10,6 +9,22 @@ logger = logging.getLogger("MassiveQC")
 
 
 def atropos(feature_path: str, SRR: str, QC_dir: str, THREADS: int):
+    """This function is main part which is used to trim the reads.
+    Filter reads that are less than 25bp.
+
+    **parameter**
+    feature_path: str
+        The directory of Features.
+    SRR: str
+        SRR ID.
+    QC_dir: str
+       The directory of result fastq file after check_fq.
+    THREADS: int
+        Thread number for atropos.
+    **return**
+    None
+    """
+    logger.info(f"Start atropos {SRR}")
     try:
         QC_dir = Path(QC_dir)
         layout = Path(feature_path) / "layout" / f"{SRR}.parquet"
@@ -35,12 +50,14 @@ def atropos(feature_path: str, SRR: str, QC_dir: str, THREADS: int):
             r1_trim = QC_dir / f"{SRR}.trim.fastq.gz"
             if r1_trim.exists():
                 (QC_dir / f"{SRR}.fastq.gz").unlink()
+        logger.info(f"Complete atropos {SRR}")
     except AtroposException as error:
         logger.warning(f"Flagging {SRR} as Atropos Bad")
         raise AtroposException("Atropos Bad")
 
 
 def run_atropos(layout_, SRR, QC_dir: Path, THREADS) -> str:
+    """Run the atropos command in shell"""
     # adapters = os.path.join(os.path.abspath(__file__), "sequencing_adapters.fa")
     if layout_ == "PE":
         r1 = QC_dir / f"{SRR}_1.fastq.gz"
@@ -72,11 +89,13 @@ def run_atropos(layout_, SRR, QC_dir: Path, THREADS) -> str:
               "-q 20 -U 0 --minimum-length 25 " \
               f"--threads {THREADS} " \
               f"-se {r1} -o {r1_trim}"
+    logger.info(f"running {cmd}")
     results = run_command(cmd, verbose=True)
     return results
 
 
 def summarize(log: str, output: Path, SRR: str) -> None:
+    """Extract features from atropos result"""
     df = pd.DataFrame(
         [parse_atropos_log(log, SRR)],
         index=pd.Index([SRR], name="srr"),
@@ -88,7 +107,8 @@ def summarize(log: str, output: Path, SRR: str) -> None:
 
 
 def parse_atropos_log(log_text: str, SRR: str) -> Tuple[int, int, int]:
-    """Example Atropos output
+    """Parse atropos log information
+       Example Atropos output
         # Example of SE
         Reads                                 records  fraction
         ----------------------------------- --------- ---------
@@ -106,6 +126,7 @@ def parse_atropos_log(log_text: str, SRR: str) -> Tuple[int, int, int]:
         Pairs written (passing filters):       1,338    98.8%
     """
     if "ERROR" in log_text:
+        logger.error(log_text)
         logger.warning(f"{SRR}: Atropos reported an error")
     try:
         log_text = log_text.replace(",", "")

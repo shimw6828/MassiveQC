@@ -1,5 +1,4 @@
 import os
-# from io import BufferedReader #使用了xopen之后会没有效果
 import re
 from collections import namedtuple
 from xopen import xopen
@@ -31,7 +30,6 @@ def _strip_control_characters(string: str):
 
 class Fastq:
     """A simple FASTQ Parser"""
-
     def __init__(self, R1: str, R2: Optional[str] = None):
         self.R1 = R1
         self.R2 = R2

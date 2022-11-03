@@ -3,13 +3,20 @@ from setuptools import setup, find_packages
 with open('requirements.txt') as f:
     requirements = f.readlines()
 
+
+with open('README.md') as f:
+    long_description = f.read()
+
+
 setup(
     name='MassiveQC',
-    version='1.0.0',
+    version='0.0.2',
     author='shimw6828',
     author_email='shimw6828@qq.com',
-    #url='https://github.com/shimw6828/MassiveQC',
+    url='https://github.com/shimw6828/MassiveQC',
     description='Tools for QC massive RNA-seq samples',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
     license='MIT',
     packages=find_packages(),
     entry_points={
@@ -19,12 +26,13 @@ setup(
             'IsoDetect = MassiveQC.IsoDetect:main'
         ]
     },
-    classifiers=(
-        "Programming Language :: Python :: 3.7",
+    classifiers=[
+        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: POSIX",
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Bio-Informatics'
-    ),
-    install_requires=requirements
+    ],
+    install_requires=requirements,
+    python_requires='>=3.7'
 )

@@ -1,9 +1,8 @@
 import logging
-import os.path
 from pathlib import Path
 import pandas as pd
 from .command import run_command
-from typing import Optional, Tuple
+from typing import Optional
 from .parser import parse_picard_markduplicate_metrics, remove_file
 import numpy as np
 
@@ -11,6 +10,7 @@ logger = logging.getLogger("MassiveQC")
 
 
 class MarkDuplicates(object):
+    """run picard MarkDuplicates and extract the result"""
     def __init__(self, feature_path: str, SRR: str, Bam_dir: str,
                  THREADS: int, picard: str, MEM: Optional[int] = 3):
         self.feature_path = Path(feature_path)

@@ -6,7 +6,7 @@ The MassiveQC is a python-based tool for quality control of massive RNA-seq data
 * Interpret input files and download sequencing files
 * Check fastq files, filter unqualified read and fastq files.
 * Align all sample batches and use multiple tools to analyze sample features.
-* Identify Outliers Using Isolation Forests on Sample Features.
+* Identify outliers using isolation forests on sample features.
 
 ## Dependencies
 MassiveQC is implemented in [Python 3.10](https://www.python.org/downloads/).
@@ -17,19 +17,27 @@ MassiveQC is implemented in [Python 3.10](https://www.python.org/downloads/).
 * Python 3.7 or later
 
 ### Prerequisites
-MntJULiP has the following dependencies:
+MassiveQC has the following dependencies:
+
+Python package:
 * [sklearn](https://scikit-learn.org/), a Python module for machine learning.
 * [shap](https://github.com/slundberg/shap), a game theoretic approach to explain the output of any machine learning model.
 * [pysradb](https://github.com/saketkc/pysradb), a Python package for retrieving metadata and downloading datasets from SRA/ENA/GEO.
-* [xopen](https://github.com/pycompression/xopen), a Python-based package for fast processing of compressed files..  
+* [xopen](https://__github__.com/pycompression/xopen), a Python-based package for fast processing of compressed files..  
 * [NumPy](https://numpy.org/), a fundamental package for scientific computing with Python.    
-* [Pandas](https://pandas.pydata.org/), a fast, powerful and flexible open source data analysis and manipulation tool.  
-* [matplotlib](https://matplotlib.org/), a comprehensive library for creating static, animated, and interactive visualizations in Python.
-* [seaborn](https://seaborn.pydata.org/), a Python data visualization library based on matplotlib.
+* [Pandas](https://pandas.pydata.org/) >= 1.3.5, a fast, powerful and flexible open source data analysis and manipulation tool.
+* [pyarrow](https://pypi.org/project/pyarrow/), provides a Python API for functionality provided by the Arrow C++ libraries
+* [more_itertools](https://pypi.org/project/more-itertools/), provides additional building blocks, recipes, and routines for working with Python iterables
+* [tqdm](https://github.com/tqdm/tqdm), a Fast, Extensible Progress Bar for Python and CLI
+
+Software:
 * [Atropos](https://github.com/jdidion/atropos), atropos is tool for specific, sensitive, and speedy trimming of NGS reads.
 * [FastQ Screen](https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/), A tool for multi-genome mapping and quality control.
 * [HISAT2](http://daehwankimlab.github.io/hisat2/), a fast and sensitive alignment program for mapping next-generation sequencing reads.
+* [samtools](https://subread.sourceforge.net/featureCounts.html), a highly efficient general-purpose read summarization program.
+* [bamtools](https://subread.sourceforge.net/featureCounts.html), a highly efficient general-purpose read summarization program.
 * [featureCounts](https://subread.sourceforge.net/featureCounts.html), a highly efficient general-purpose read summarization program.
+
 
 To install using pip
 ```
@@ -47,8 +55,9 @@ conda create -c bioconda -n MassiveQC MassiveQC
 ## Usage
 For users running locally, we provide the `MultiQC` to automate parallel processing.
 ```
-usage: MultiQC [-h] [-c CONF] -i INPUT [-a ASCP_KEY] -f FASTQ_SCREEN_CONFIG -g GTF -x HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p
-                       PICARD -r REF_FLAT -o OUTDIR [-w WORKERS] [-t THREADS] [-d DOWNLOAD] [--only_download]
+usage: MultiQC [-h] [-c CONF] -i INPUT [-a ASCP_KEY] -f FASTQ_SCREEN_CONFIG -g GTF -x HT2_IDX [-k KNOWN_SPLICESITE_INFILE]
+               -p PICARD -r REF_FLAT -o OUTDIR [-w WORKERS] [-t THREADS] [-d DOWNLOAD] [--only_download] [--skip_download]
+               [--remove_fastq] [--remove_bam]
 
 ...
 
@@ -79,12 +88,28 @@ options:
   -d DOWNLOAD, --download DOWNLOAD
                         Path to SRA fastq files. The default is $OUTDIR/download
   --only_download       Only run the download step
+  --skip_download       Skip the download step
+  --remove_fastq        Don't remain the fastq after running hisat2
+  --remove_bam          Don't remain the bam after running FeatureCounts
+```
+
+In the example, Users need to provide multiple files:
+* `asperaweb_id_dsa.openssh` is the aspera key in [IBM aspera](https://www.ibm.com/products/aspera).
+* `fastq_screen.conf` is the reference for [FastQ Screen](https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/). It can be downloaded with `fastq_screen --get_genomes`.
+* `dmel.genome` is Hisat2 index. Need to be created by the users.
+* `dmel_r6-11.refflat` is created from gtf, Generated using the code below
+* `picard.jar` can be download [here](https://github.com/broadinstitute/picard/releases)
+```
+# Generate refflat file
+gtfToGenePred -genePredExt dmel-all-r6.11.gtf \
+-ignoreGroupsWithoutExons /dev/stdout| awk 'BEGIN { OFS="\t"} \
+{print $12, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' >  dmel_r6-11.refflat
 ```
 Users can optionally specify parameters using a conf file like `example/example_conf.txt`.
-`picard.jar` can be download [here](https://github.com/broadinstitute/picard/releases)
+
 ```
 # Use conf file
-MultiQC -c example/example_conf.txt -i example/srx2srr.txt
+MultiQC -c example/example_conf.txt -i example/input.txt
 
 # Without conf file
 MultiQC -a ~/miniconda3/etc/asperaweb_id_dsa.openssh \
@@ -95,26 +120,15 @@ MultiQC -a ~/miniconda3/etc/asperaweb_id_dsa.openssh \
 -p example/picard.jar \
 -r example/dmel_r6-11.refflat \
 -o ~/project/MassiveQC \
--i example/srx2srr.txt
-```
-In the example, Users need to provide multiple files:
-* `asperaweb_id_dsa.openssh` is the aspera key in [IBM aspera](https://www.ibm.com/products/aspera).
-* `fastq_screen.conf` is the reference for [FastQ Screen](https://www.bioinformatics.babraham.ac.uk/projects/fastq_screen/). It can be downloaded with `fastq_screen --get_genomes`.
-* `dmel.genome` is Hisat2 index. Need to be created by the users.
-* `dmel_r6-11.refflat` is created from gtf. Generated using the code below
-```
-# Generate refflat file
-gtfToGenePred -genePredExt dmel-all-r6.11.gtf \
--ignoreGroupsWithoutExons /dev/stdout| awk 'BEGIN { OFS="\t"} \
-{print $12, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' >  dmel_r6-11.refflat
+-i example/input.txt
 ```
 
 For users running on cluster (PBS or Slurm), we provide `SingleQC` and `IsoDetect` for single sample. Users can batch process samples according to their platform.
 
 ```
-usage: SingleQC [-h] [-c CONF] -s SRR [-a ASCP_KEY] -f FASTQ_SCREEN_CONFIG -g GTF -x
-                        HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p PICARD -r REF_FLAT -o OUTDIR
-                        [-t THREADS] [-d DOWNLOAD] [--only_download]
+usage: SingleQC [-h] [-c CONF] -s SRR [-a ASCP_KEY] -f FASTQ_SCREEN_CONFIG -g GTF -x HT2_IDX [-k KNOWN_SPLICESITE_INFILE] -p
+                PICARD -r REF_FLAT -o OUTDIR [-t THREADS] [-d DOWNLOAD] [--only_download] [--skip_download] [--remove_fastq]
+                [--remove_bam]
 
 ...
 
@@ -140,35 +154,39 @@ options:
   -t THREADS, --THREADS THREADS
                         The number of threads for tools like Hisat2 in one task
   -d DOWNLOAD, --download DOWNLOAD
-                        Path to SRA fastq files. The default is $outdir/download
+                        Path to SRA fastq files. The default is $OUTDIR/download
   --only_download       Only run the download step
-
+  --skip_download       Skip the download step
+  --remove_fastq        Don't remain the fastq after running hisat2
+  --remove_bam          Don't remain the bam after running FeatureCounts
 ```
 
 Here we provide an example on a PBS.
 ```
-# create the outdir and pbs dir
-mkdir -p ~/project/MassiveQC
-mkdir -p ~/project/MassiveQC/pbs
-cd ~/project/MassiveQC/pbs
+# create the outdir and pbs directory
+cd ~/github/MassiveQC/example # my work directory
+mkdir -p results/
+mkdir -p results/pbs
+
 # Generate pbs script and submit using for loop 
-for srr in `sed "1d" ~/project/input.txt|cut -f2 |xargs`
-do
-  # We have no network in the node, so we need to download the fastq file in advance
-  SingleQC -c ~/project/config.txt -s $srr --only_download
-  #conda activate in pbs or slurm will be failed, see https://github.com/conda/conda/issues/5071
-  # If the download is successful, the download step will be skipped.
-  echo "source activate MassiveQC; SingleQC -c ~/project/config.txt -s $srr --skip_download" > ~/project/MassiveQC/pbs/${srr}.pbs
-  qsub -q batch -V -l nodes=1:ppn=2 ~/project/MassiveQC/pbs/${srr}.pbs
-done
+function ProcessOne {
+  SingleQC -c example_conf.txt -s $1 --only_download
+  # conda activate in pbs or slurm will be failed, see https://github.com/conda/conda/issues/5071
+  echo "cd ~/github/MassiveQC/example; SingleQC -c example_conf.txt -s $1 --remove_fastq --remove_bam" > results/pbs/${1}.pbs
+  qsub -q batch -V -l nodes=1:ppn=2 results/pbs/${1}.pbs -o results/pbs/ -e results/pbs/
+}
+export -f ProcessOne
+sed "/^ *#/d" input.txt|sed "1d"|cut -f2 |parallel --ungroup --verbose -j 3 ProcessOne {}
+
+
 
 # After all scripts have been run, start building the feature matrix
-# the result feature data file is in /home/mwshi/project/MassiveQC/Features
 # Get started with outlier filtering
-IsoDetect -f ~/project/MassiveQC/Features/features.parquet
-#the filter result file is ~/project/MassiveQC/result.csv
+# the feature data file in results/Features
+IsoDetect -i input.txt -o results/
+# the filter result file is results/result.csv
 ```
-
+We provide the test file in example directory
 ## Input/Output
 ### Input
 The main input of MassiveQC is a file contains a list of SRX and SRR id. For example:
@@ -179,7 +197,7 @@ SRX17839866 SRR21851295
 SRX17839866 SRR21851296
 SRX018864   SRR039433
 ```
-Massiveqc will process and feature extraction for each srr, then merge the features through srx, and finally identify qualified srx samples.
+MassiveQC will process and feature extraction for each srr, then merge the features through srx, and finally identify qualified srx samples.
 
 Users can also provide only srr, so that massiveQC will filter only on srr
 ```
@@ -191,7 +209,7 @@ SRR039433
 ```
 
 ### Output
-MassiveQC will generate multiple result files under the outdir folder, the path tree is as follows.
+MassiveQC will generate multiple result files under the OUTDIR folder, the path tree is as follows.
 ```
 OUTDIR
 -Bam

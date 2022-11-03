@@ -8,6 +8,7 @@ import pandas as pd
 
 
 def feature_store(done_samples: list, outdir: str):
+    """Merge the features of each sample"""
     OUTPUTS = [
         "aln_stats",
         "atropos",
