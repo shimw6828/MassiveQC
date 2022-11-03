@@ -48,8 +48,13 @@ Alternatively, if you use conda:
 conda install -c bioconda MassiveQC
 ```
 This step will install all the dependencies. If you have an existing environment with a lot of pre-installed packages, conda might be slow. Please consider creating a new enviroment for MassiveQC:
+To create a new environment based on the environment.yaml:
 ```
-conda create -c bioconda -n MassiveQC MassiveQC
+conda env create -f environment.yml
+```
+Or for a basic environment and downloading optional dependencies as needed:
+```
+conda create -n MassiveQC -c bioconda python=3 MassiveQC
 ```
 
 ## Usage
