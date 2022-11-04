@@ -3,14 +3,14 @@ from setuptools import setup, find_packages
 # with open('requirements.txt') as f:
 #     requirements = f.readlines()
 requirements = [
-    'sklearn',
+    'scikit-learn',
     'shap',
     'pysradb',
     'xopen',
     'NumPy',
     'Pandas >=1.3.2',
     'pyarrow',
-    'more_itertools',
+    'more-itertools',
     'tqdm'
 ]
 
@@ -20,7 +20,7 @@ with open('README.md') as f:
 
 setup(
     name='MassiveQC',
-    version='0.0.3',
+    version='0.0.5',
     author='shimw6828',
     author_email='shimw6828@qq.com',
     url='https://github.com/shimw6828/MassiveQC',

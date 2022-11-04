@@ -20,14 +20,14 @@ MassiveQC is implemented in [Python 3.10](https://www.python.org/downloads/).
 MassiveQC has the following dependencies:
 
 Python package:
-* [sklearn](https://scikit-learn.org/), a Python module for machine learning.
+* [scikit-learn](https://scikit-learn.org/), a Python module for machine learning.
 * [shap](https://github.com/slundberg/shap), a game theoretic approach to explain the output of any machine learning model.
 * [pysradb](https://github.com/saketkc/pysradb), a Python package for retrieving metadata and downloading datasets from SRA/ENA/GEO.
 * [xopen](https://__github__.com/pycompression/xopen), a Python-based package for fast processing of compressed files..  
 * [NumPy](https://numpy.org/), a fundamental package for scientific computing with Python.    
 * [Pandas](https://pandas.pydata.org/) >= 1.3.5, a fast, powerful and flexible open source data analysis and manipulation tool.
 * [pyarrow](https://pypi.org/project/pyarrow/), provides a Python API for functionality provided by the Arrow C++ libraries
-* [more_itertools](https://pypi.org/project/more-itertools/), provides additional building blocks, recipes, and routines for working with Python iterables
+* [more-itertools](https://pypi.org/project/more-itertools/), provides additional building blocks, recipes, and routines for working with Python iterables
 * [tqdm](https://github.com/tqdm/tqdm), a Fast, Extensible Progress Bar for Python and CLI
 
 Software:
