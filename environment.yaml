@@ -11,7 +11,7 @@ dependencies:
   - xopen
   - NumPy
   - Pandas >=1.3.2
-  - pyarrow
+  - fastparquet
   - more-itertools
   - tqdm
   - atropos

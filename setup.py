@@ -9,7 +9,7 @@ requirements = [
     'xopen',
     'NumPy',
     'Pandas >=1.3.2',
-    'pyarrow',
+    'fastparquet',
     'more-itertools',
     'tqdm'
 ]
@@ -20,7 +20,7 @@ with open('README.md') as f:
 
 setup(
     name='MassiveQC',
-    version='0.0.5',
+    version='0.0.6',
     author='shimw6828',
     author_email='shimw6828@qq.com',
     url='https://github.com/shimw6828/MassiveQC',

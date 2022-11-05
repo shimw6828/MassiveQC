@@ -26,9 +26,9 @@ Python package:
 * [xopen](https://__github__.com/pycompression/xopen), a Python-based package for fast processing of compressed files..  
 * [NumPy](https://numpy.org/), a fundamental package for scientific computing with Python.    
 * [Pandas](https://pandas.pydata.org/) >= 1.3.5, a fast, powerful and flexible open source data analysis and manipulation tool.
-* [pyarrow](https://pypi.org/project/pyarrow/), provides a Python API for functionality provided by the Arrow C++ libraries
-* [more-itertools](https://pypi.org/project/more-itertools/), provides additional building blocks, recipes, and routines for working with Python iterables
-* [tqdm](https://github.com/tqdm/tqdm), a Fast, Extensible Progress Bar for Python and CLI
+* [fastparquet](https://github.com/dask/fastparquet/), a python implementation of the parquet format, aiming integrate into python-based big data work-flows.
+* [more-itertools](https://pypi.org/project/more-itertools/), provides additional building blocks, recipes, and routines for working with Python iterables.
+* [tqdm](https://github.com/tqdm/tqdm), a Fast, Extensible Progress Bar for Python and CLI.
 
 Software:
 * [Atropos](https://github.com/jdidion/atropos), atropos is tool for specific, sensitive, and speedy trimming of NGS reads.
