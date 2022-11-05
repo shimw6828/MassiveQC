@@ -175,15 +175,15 @@ def run_check_fq(SRR, SRA_path, QC_dir, feature_path):
         if os.path.exists(summary_file):
             return [r1.as_posix(), r2.as_posix()]
         r1_gz, r2_gz, fq = check_and_compress_fastq(r1=r1.as_posix(), QC_dir=QC_dir, r2=r2.as_posix())
-        raw_fqs.append(r1.as_posix())
-        raw_fqs.append(r2.as_posix())
+        raw_fqs.append(r1)
+        raw_fqs.append(r2)
     elif len(file_list) == 1:
         logger.info("Single-End QC")
         r1 = Path(SRA_path, f"{SRR}.fastq.gz")
         if os.path.exists(summary_file):
-            return [r1.as_posix()]
+            return [r1]
         r1_gz, fq = check_and_compress_fastq(r1=r1.as_posix(), QC_dir=QC_dir)
-        raw_fqs.append(r1.as_posix())
+        raw_fqs.append(r1)
     elif len(file_list) == 0:
         raise DownloadException
     save_output(feature_path, fq, SRR)

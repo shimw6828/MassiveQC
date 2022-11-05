@@ -20,7 +20,7 @@ with open('README.md') as f:
 
 setup(
     name='MassiveQC',
-    version='0.0.6',
+    version='0.0.7',
     author='shimw6828',
     author_email='shimw6828@qq.com',
     url='https://github.com/shimw6828/MassiveQC',

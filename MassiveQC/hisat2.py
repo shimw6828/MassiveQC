@@ -49,8 +49,8 @@ class Hisat2(object):
         remove_file(sam.as_posix())
         _alnStat = self.feature_path / "aln_stats" / f"{self.SRR}.parquet"
         self.alignment_stats(bam, _alnStat)
-        trim_fqs.append(self.r1.as_posix())
-        trim_fqs.append(self.r2.as_posix())
+        trim_fqs.append(self.r1)
+        trim_fqs.append(self.r2)
         return trim_fqs
 
     def run_hisat2(self):
