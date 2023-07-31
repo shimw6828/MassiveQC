@@ -2,5 +2,6 @@
 
 MassiveQC's paper was published in [Briefings in Bioinformatics](https://doi.org/10.1093/bib/bbad177). Here are some supplementary files for the manuscript.
 
-* Tissue stage.csv, contains tissue and stage information after manual standardisation and corresponds to Figure 4A.
-* metadata.csv, has been merged with STUDY information that can be used to deal with the batch effect, and retained samples that have undergone quality control (>5k expressed genes and >2 million mapped reads).
+
+* `Tissue stage.csv`, which contains tissue and stage information after manual standardization, corresponding to Figure 4A.
+* `metadata.csv`, which has been merged with STUDY information that can be used to deal with batch effects, and includes samples that have undergone quality control (with >5k expressed genes and >2 million mapped reads).
