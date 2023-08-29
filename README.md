@@ -22,8 +22,7 @@ MassiveQC has the following dependencies:
 Python package:
 * [scikit-learn](https://scikit-learn.org/), a Python module for machine learning.
 * [shap](https://github.com/slundberg/shap), a game theoretic approach to explain the output of any machine learning model.
-* [pysradb](https://github.com/saketkc/pysradb), a Python package for retrieving metadata and downloading datasets from SRA/ENA/GEO.
-* [xopen](https://__github__.com/pycompression/xopen), a Python-based package for fast processing of compressed files..  
+* [xopen](https://__github__.com/pycompression/xopen), a Python-based package for fast processing of compressed files. 
 * [NumPy](https://numpy.org/), a fundamental package for scientific computing with Python.    
 * [Pandas](https://pandas.pydata.org/) >= 1.3.5, a fast, powerful and flexible open source data analysis and manipulation tool.
 * [fastparquet](https://github.com/dask/fastparquet/), a python implementation of the parquet format, aiming integrate into python-based big data work-flows.
@@ -45,16 +44,17 @@ pip3 install MassiveQC
 ```
 Alternatively, if you use conda:
 ```
-conda install -c bioconda MassiveQC
+# Please note that bowtie2 depends on libgcc-ng>=12, which is exclusively available on conda-forge.
+conda install -c bioconda -c conda-forge MassiveQC
 ```
 This step will install all the dependencies. If you have an existing environment with a lot of pre-installed packages, conda might be slow. Please consider creating a new enviroment for MassiveQC:
 To create a new environment based on the environment.yaml:
 ```
-conda env create -f environment.yml
+conda env create -f environment.yaml
 ```
 Or for a basic environment and downloading optional dependencies as needed:
 ```
-conda create -n MassiveQC -c bioconda python=3 MassiveQC
+conda create -n MassiveQC -c bioconda -c conda-forge python=3 MassiveQC
 ```
 
 ## Usage

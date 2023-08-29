@@ -26,7 +26,6 @@ def run_fastq_screen(config_file, feature_path, QC_dir, summary_file, SRR, THREA
     summarize(feature_file, output_file, SRR)
     feature_file.unlink()
     (feature_screen / f"{feature_file.stem}.html").unlink()
-    (feature_screen / f"{feature_file.stem}.png").unlink()
 
 
 def screen(config_file, feature_screen, fastq, THREADS: int) -> None:

@@ -5,7 +5,6 @@ from setuptools import setup, find_packages
 requirements = [
     'scikit-learn',
     'shap',
-    'pysradb',
     'xopen',
     'NumPy',
     'Pandas >=1.3.2',
@@ -20,7 +19,7 @@ with open('README.md') as f:
 
 setup(
     name='MassiveQC',
-    version='0.0.7',
+    version='0.1.2',
     author='shimw6828',
     author_email='shimw6828@qq.com',
     url='https://github.com/shimw6828/MassiveQC',
