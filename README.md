@@ -8,6 +8,9 @@ The MassiveQC is a python-based tool for quality control of massive RNA-seq data
 * Align all sample batches and use multiple tools to analyze sample features.
 * Identify outliers using isolation forests on sample features.
 
+####citation
+Sheng Hu Qian, Meng-Wei Shi, Dan-Yang Wang, Justin M Fear, Lu Chen, Yi-Xuan Tu, Hong-Shan Liu, Yuan Zhang, Shuai-Jie Zhang, Shan-Shan Yu, Brian Oliver, Zhen-Xia Chen, Integrating massive RNA-seq data to elucidate transcriptome dynamics in Drosophila melanogaster, Briefings in Bioinformatics, Volume 24, Issue 4, July 2023, bbad177, https://doi.org/10.1093/bib/bbad177
+
 ## Dependencies
 MassiveQC is implemented in [Python 3.10](https://www.python.org/downloads/).
 
